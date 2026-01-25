@@ -18,7 +18,7 @@ export default $config({
 
     const worker = new sst.cloudflare.Worker("Server", {
       url: true,
-      domain: $app.stage === "dev" ? "models.dev" : undefined,
+      domain: $app.stage === "dev" ? "models.ideavo.ai" : undefined,
       link: [
         new sst.Secret("PosthogToken"),
         new sst.Secret("LakeUrl"),
