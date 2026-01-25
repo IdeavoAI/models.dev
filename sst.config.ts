@@ -21,7 +21,7 @@ export default $config({
     const token = new sst.Secret("LakeToken");
     const worker = new sst.cloudflare.Worker("Server", {
       url: true,
-      domain: $app.stage === "dev" ? "models.dev" : undefined,
+      domain: $app.stage === "dev" ? "models.ideavo.ai" : undefined,
       link: $resolve([endpoint.value, token.value]).apply((values) => {
         if (!/^https:\/\/[a-f0-9]{32}\.ingest\.cloudflare\.com\/?$/.test(values[0]))
           throw new Error("LakeEndpoint must be a Cloudflare stream endpoint");
