@@ -423,6 +423,9 @@ export const ModelFamilyValues = [
   // Neural Chat
   "neural-chat",
 
+  // Ideavo
+  "ideavo",
+
   // Pangu (Ascend Tribe)
   "pangu",
 
