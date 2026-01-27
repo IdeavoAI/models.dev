@@ -12,6 +12,17 @@ export default {
     ctx: ExecutionContext,
   ): Promise<Response> {
     const url = new URL(request.url);
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Max-Age": "86400",
+        },
+      });
+    }
+
     const ip = request.headers.get("cf-connecting-ip") ?? undefined;
     const country = request.headers.get("cf-ipcountry") ?? undefined;
     const agent = request.headers.get("user-agent") ?? undefined;
@@ -102,6 +113,30 @@ export default {
     }
 
     if (url.pathname === "/api.json") {
+      const providerFilter = url.searchParams.get("providers");
+
+      if (providerFilter) {
+        url.pathname = "/_api.json";
+        const response = await env.ASSETS.fetch(
+          new Request(url.toString(), request),
+        );
+        const providers = (await response.json()) as Record<string, unknown>;
+        const providerList = providerFilter.split(",");
+        const result = Object.fromEntries(
+          Object.entries(providers).filter(([id]) => providerList.includes(id)),
+        );
+
+        return new Response(JSON.stringify(result), {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+
       url.pathname = "/_api.json";
     } else if (url.pathname === "/models.json") {
       url.pathname = "/_models.json";
@@ -134,6 +169,20 @@ export default {
     }
 
     const response = await env.ASSETS.fetch(new Request(url.toString(), request));
+
+    if (url.pathname === "/_api.json") {
+      const headers = new Headers(response.headers);
+      headers.set("Access-Control-Allow-Origin", "*");
+      headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "Content-Type");
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
+
     if (response.status !== 404) return response;
 
     return new Response(null, {
