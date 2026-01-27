@@ -99,12 +99,37 @@ Bun.serve({
         },
       });
     },
-    "/api.json": () =>
-      Response.json(Providers, {
+    "/api.json": (req) => {
+      if (req.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Max-Age": "86400",
+          },
+        });
+      }
+
+      const url = new URL(req.url);
+      const providerFilter = url.searchParams.get("providers");
+      const result = providerFilter
+        ? Object.fromEntries(
+            Object.entries(Providers).filter(([id]) =>
+              providerFilter.split(",").includes(id),
+            ),
+          )
+        : Providers;
+
+      return Response.json(result, {
         headers: {
           "Cache-Control": "public, max-age=3600",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
         },
-      }),
+      });
+    },
     "/models.json": () =>
       Response.json(Models, {
         headers: {
