@@ -5,6 +5,10 @@ on:
     branches:
       - dev
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Sync upstream"]
+    types: [completed]
+    branches: [dev]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
