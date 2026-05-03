@@ -1,7 +1,7 @@
-name = "Kimi K2.5"
+name = "Kimi K2.6"
 family = "kimi"
-release_date = "2026-01-27"
-last_updated = "2026-01-27"
+release_date = "2026-04-21"
+last_updated = "2026-04-21"
 attachment = true
 reasoning = true
 temperature = true
@@ -16,7 +16,7 @@ cache_read = 0.1
 
 [limit]
 context = 262_144
-output = 262_144
+output = 65_536
 
 [modalities]
 input = ["text", "image", "video"]
