@@ -24,9 +24,32 @@ import {
 const root = path.join(import.meta.dir, "..", "..", "..");
 const Catalog = await generateCatalog(root);
 
-export const Models = Catalog.models;
-export const Providers = Catalog.providers;
+const requestedProviders = process.env.API_PROVIDERS?.split(",")
+  .map((provider) => provider.trim())
+  .filter((provider) => provider.length > 0);
 
+if (requestedProviders?.length) {
+  const availableProviders = new Set(Object.keys(Catalog.providers));
+  const missingProviders = requestedProviders.filter(
+    (provider) => !availableProviders.has(provider),
+  );
+
+  if (missingProviders.length > 0) {
+    throw new Error(`Unknown API_PROVIDERS: ${missingProviders.join(", ")}`);
+  }
+}
+
+export const Providers = requestedProviders?.length
+  ? Object.fromEntries(
+      Object.entries(Catalog.providers).filter(([provider]) =>
+        requestedProviders.includes(provider),
+      ),
+    )
+  : Catalog.providers;
+
+export const Models = requestedProviders?.length
+  ? filterModelsForProviders(Catalog.models, Providers)
+  : Catalog.models;
 const LabMetadata = loadLabMetadata(root);
 const ProviderLogoSvgs = new Map<string, string>();
 const LabLogoSvgs = new Map<string, string>();
@@ -94,6 +117,35 @@ interface SearchIndexItem {
   npm?: string;
   api?: string;
   updated?: string;
+}
+
+function filterModelsForProviders(
+  models: Record<string, CatalogModel>,
+  providers: Record<string, CatalogProvider>,
+) {
+  const modelIds = new Set<string>();
+
+  for (const [providerId, provider] of Object.entries(providers)) {
+    for (const [modelId, model] of Object.entries(provider.models)) {
+      const baseModelId = model.canonical_model_id;
+      if (baseModelId && models[baseModelId]) {
+        modelIds.add(baseModelId);
+        continue;
+      }
+
+      if (models[modelId]) {
+        modelIds.add(modelId);
+        continue;
+      }
+
+      const providerScopedId = `${providerId}/${modelId}`;
+      if (models[providerScopedId]) modelIds.add(providerScopedId);
+    }
+  }
+
+  return Object.fromEntries(
+    Object.entries(models).filter(([modelId]) => modelIds.has(modelId)),
+  );
 }
 
 const LAB_NAME_OVERRIDES: Record<string, string> = {
