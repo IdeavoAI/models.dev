@@ -64,25 +64,29 @@ try {
 }
 
 const template = await Bun.file("./dist/index.html").text();
+let rootHtml = "";
 
 for (const [route, rendered] of RenderedPages) {
-  const filePath = route === "/"
-    ? "./dist/_index.html"
-    : path.join("./dist", route, "index.html");
+  const html = renderDocument(template, rendered);
+  const filePath =
+    route === "/" ? "./dist/index.html" : path.join("./dist", route, "index.html");
+
+  if (route === "/") rootHtml = html;
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await Bun.write(filePath, renderDocument(template, rendered));
+  await Bun.write(filePath, html);
 }
 
-await Bun.write("./dist/api.json", JSON.stringify(Providers));
-await Bun.write(
-  "./dist/catalog.json",
-  JSON.stringify({ models: Models, providers: Providers }),
-);
-await Bun.write("./dist/models.json", JSON.stringify(Models));
+// Keep legacy asset names for the old Worker while exposing normal static paths for Pages.
+await Bun.write("./dist/_index.html", rootHtml);
 
-await fs.rename("./dist/api.json", "./dist/_api.json");
-await fs.rename("./dist/catalog.json", "./dist/_catalog.json");
-await fs.rename("./dist/models.json", "./dist/_models.json");
+const providersJson = JSON.stringify(Providers);
+const catalogJson = JSON.stringify({ models: Models, providers: Providers });
+const modelsJson = JSON.stringify(Models);
 
-await fs.rm("./dist/index.html", { force: true });
+await Bun.write("./dist/api.json", providersJson);
+await Bun.write("./dist/_api.json", providersJson);
+await Bun.write("./dist/catalog.json", catalogJson);
+await Bun.write("./dist/_catalog.json", catalogJson);
+await Bun.write("./dist/models.json", modelsJson);
+await Bun.write("./dist/_models.json", modelsJson);
