@@ -5,12 +5,20 @@ on:
     branches:
       - dev
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Sync upstream"]
+    types: [completed]
+    branches: [dev]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      API_PROVIDERS: ${{ vars.API_PROVIDERS || 'amazon-bedrock,anthropic,alibaba-coding-plan,chutes,google,kimi-for-coding,minimax-coding-plan,mistral,nvidia,ollama-cloud,openai,opencode,opencode-go,openrouter,togetherai,zai-coding-plan,ideavo' }}
+      CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'models-dev' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,18 +28,14 @@ jobs:
         with:
           bun-version: latest
 
-      # Workaround for Pulumi version conflict:
-      # GitHub runners have Pulumi 3.212.0+ pre-installed, which removed the -root flag
-      # from pulumi-language-nodejs (see https://github.com/pulumi/pulumi/pull/21065).
-      # SST 3.17.x uses Pulumi SDK 3.210.0 which still passes -root, causing a conflict.
-      # Removing the system language plugin forces SST to use its bundled compatible version.
-      # TODO: Remove when sst supports Pulumi >3.210.0
-      - name: Fix Pulumi version conflict
-        run: sudo rm -f /usr/local/bin/pulumi-language-nodejs
-
       - name: Install dependencies
         run: bun install
 
-      - run: bun sst deploy --stage=dev
+      - name: Build static site
+        run: bun run --cwd packages/web build
+
+      - name: Deploy to Cloudflare Pages
+        run: bunx wrangler pages deploy packages/web/dist --project-name "$CLOUDFLARE_PAGES_PROJECT_NAME" --branch "$GITHUB_REF_NAME"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
