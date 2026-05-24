@@ -69,15 +69,21 @@ try {
 }
 
 const template = await Bun.file("./dist/index.html").text();
+let rootHtml = "";
 
 for (const [route, rendered] of RenderedPages) {
-  const filePath = route === "/"
-    ? "./dist/_index.html"
-    : path.join("./dist", route, "index.html");
+  const html = renderDocument(template, rendered);
+  const filePath =
+    route === "/" ? "./dist/index.html" : path.join("./dist", route, "index.html");
+
+  if (route === "/") rootHtml = html;
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await Bun.write(filePath, renderDocument(template, rendered));
+  await Bun.write(filePath, html);
 }
+
+// Keep legacy asset names for the old Worker while exposing normal static paths for Pages.
+await Bun.write("./dist/_index.html", rootHtml);
 
 const catalog = { models: Models, providers: Providers };
 const variants: Array<[suffix: string, filter: ModelTypeFilter]> = [
@@ -93,4 +99,7 @@ for (const [suffix, filter] of variants) {
   await Bun.write(`./dist/_catalog${suffix}.json`, JSON.stringify(filtered));
 }
 
-await fs.rm("./dist/index.html", { force: true });
+// Pages serves by path, not query string - publish the full catalog publicly.
+await Bun.write("./dist/api.json", JSON.stringify(catalog.providers));
+await Bun.write("./dist/models.json", JSON.stringify(catalog.models));
+await Bun.write("./dist/catalog.json", JSON.stringify(catalog));
