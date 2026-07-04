@@ -1,14 +1,6 @@
-name = "Claude Opus 4.7"
-family = "claude-opus"
-release_date = "2026-04-17"
-last_updated = "2026-04-17"
-attachment = true
-reasoning = true
+base_model = "anthropic/claude-opus-4-7"
 reasoning_options = [{ type = "budget_tokens", min = 1_024 }]
 temperature = true
-tool_call = true
-knowledge = "2025-05"
-open_weights = false
 
 [cost]
 input = 5.00
@@ -19,10 +11,6 @@ cache_write = 6.25
 [limit]
 context = 200_000
 output = 64_000
-
-[modalities]
-input = ["text", "image", "pdf"]
-output = ["text"]
 
 [provider]
 npm = "@ai-sdk/anthropic"
