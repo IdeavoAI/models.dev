@@ -30,7 +30,27 @@ jobs:
       - name: Rebase onto upstream/dev
         id: rebase
         run: |
-          if git rebase upstream/dev; then
+          set +e
+          git rebase upstream/dev
+          rebase_status=$?
+          set -e
+
+          while [ $rebase_status -ne 0 ]; do
+            if git status --porcelain | grep -q '^UD .github/workflows/sync-models.yml$'; then
+              echo "Keeping fork deletion of upstream sync-models workflow."
+              git rm .github/workflows/sync-models.yml
+              set +e
+              GIT_EDITOR=true git rebase --continue
+              rebase_status=$?
+              set -e
+            else
+              git rebase --abort
+              echo "status=conflict" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          if [ $rebase_status -eq 0 ]; then
             echo "status=success" >> $GITHUB_OUTPUT
           else
             git rebase --abort
