@@ -17,7 +17,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
-      API_PROVIDERS: ${{ vars.API_PROVIDERS || 'amazon-bedrock,anthropic,alibaba-coding-plan,chutes,google,kimi-for-coding,minimax-coding-plan,mistral,nvidia,ollama-cloud,openai,opencode,opencode-go,openrouter,togetherai,zai-coding-plan,ideavo' }}
+      API_PROVIDERS: ${{ vars.API_PROVIDERS || 'amazon-bedrock,anthropic,alibaba-coding-plan,chutes,google,kimi-for-coding,minimax-coding-plan,mistral,nvidia,ollama-cloud,openai,opencode,opencode-go,openrouter,togetherai,tokenrouter,zai-coding-plan,ideavo' }}
       CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'models-dev' }}
     steps:
       - name: Checkout code
