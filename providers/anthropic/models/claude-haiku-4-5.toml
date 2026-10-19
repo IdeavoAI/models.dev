@@ -6,6 +6,7 @@
 schema = 2
 base_model = "anthropic/claude-haiku-4-5"
 description = "Fast Claude lane for lightweight agents, office tasks, and responsive chat"
+status = "deprecated"
 
 [capabilities]
 tools = { supported = true, choice = ["auto", "none", "required", "tool"] }
