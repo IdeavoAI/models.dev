@@ -10,6 +10,7 @@ family = "claude-haiku"
 open_weights = false
 knowledge = "2025-02-28"
 release_date = "2025-10-15"
+status = "deprecated"
 
 [modalities]
 input = ["text", "image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]
