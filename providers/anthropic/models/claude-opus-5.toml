@@ -10,6 +10,7 @@
 # Per-API tools: the OpenAI SDK compatibility layer ignores `strict` and takes only function tools, so strict and search sit on [api.messages] only; tool_choice works on both APIs and stays top-level (https://platform.claude.com/docs/en/api/openai-sdk). Live 2026-10-26 on Chat Completions (claude-sonnet-4-6): a strict tool whose schema strict mode rejects was accepted, and a tool_search_tool_regex tool returned 400 "tools.0.type: Input should be 'function'".
 schema = 2
 base_model = "anthropic/claude-opus-5"
+status = "deprecated"
 
 [capabilities]
 tools = { supported = true, choice = ["auto", "none", "required", "tool"] }
