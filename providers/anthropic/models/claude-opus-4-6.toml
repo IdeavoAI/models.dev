@@ -9,6 +9,7 @@ open_weights = false
 knowledge = "2025-05-31"
 release_date = "2026-02-04"
 last_updated = "2026-03-13"
+status = "deprecated"
 
 [modalities]
 input = ["text", "image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]

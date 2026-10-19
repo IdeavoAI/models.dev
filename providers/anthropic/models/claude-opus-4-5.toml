@@ -3,6 +3,7 @@
 schema = 2
 base_model = "anthropic/claude-opus-4-5"
 description = "Flagship Claude model for deep reasoning, coding, and long-horizon agents"
+status = "deprecated"
 
 [capabilities]
 tools = { supported = true }

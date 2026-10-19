@@ -7,6 +7,7 @@
 # Per-API flags: mid-conversation system messages, per-message output_config and tool_addition/tool_removal are Messages API features, so they sit on [api.messages]. The OpenAI SDK compatibility endpoint hoists system messages to the top (https://platform.claude.com/docs/en/api/openai-sdk) and has no per-message effort or tool changes.
 schema = 2
 base_model = "anthropic/claude-opus-5"
+status = "deprecated"
 
 [capabilities]
 tools = { supported = true }
