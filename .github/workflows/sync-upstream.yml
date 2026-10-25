@@ -36,9 +36,13 @@ jobs:
           set -e
 
           while [ $rebase_status -ne 0 ]; do
-            if git status --porcelain | grep -q '^UD .github/workflows/sync-models.yml$'; then
-              echo "Keeping fork deletion of upstream sync-models workflow."
-              git rm .github/workflows/sync-models.yml
+            conflicts=$(git status --porcelain | grep -E '^(DD|AU|UD|UA|DU|AA|UU) ' || true)
+            # Only auto-resolve when every conflict is an upstream edit to a workflow the fork deleted.
+            if [ -n "$conflicts" ] && ! echo "$conflicts" | grep -qvE '^UD \.github/workflows/'; then
+              echo "$conflicts" | cut -c4- | while read -r file; do
+                echo "Keeping fork deletion of upstream workflow $file."
+                git rm "$file"
+              done
               set +e
               GIT_EDITOR=true git rebase --continue
               rebase_status=$?
