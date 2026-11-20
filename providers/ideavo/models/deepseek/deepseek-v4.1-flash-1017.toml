@@ -4,7 +4,7 @@ name = "DeepSeek V4.1 Flash"
 description = "Fast DeepSeek model for efficient chat, coding help, and agent loops"
 
 [modalities]
-input = ["text"]
+input = ["text", "image/jpeg", "image/png", "image/gif", "image/webp"]
 output = ["text"]
 
 [capabilities]
